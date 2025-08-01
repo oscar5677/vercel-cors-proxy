@@ -1,6 +1,6 @@
 import express from 'express';
 import cors from 'cors';
-import { request as undiciRequest } from 'undici'; // ✅ import undici
+import { request as undiciRequest } from 'undici';
 
 function parseProxyParameters(proxyRequest) {
   const params = {};
@@ -15,7 +15,8 @@ function parseProxyParameters(proxyRequest) {
 
 const app = express();
 app.use(cors());
-app.options('/*', cors()); // handle preflight
+app.options('/*', cors());
+
 app.set('json spaces', 2);
 
 app.all('/*', async (req, res) => {
@@ -30,33 +31,30 @@ app.all('/*', async (req, res) => {
 
     const upstream = await undiciRequest(proxyParams.url, {
       method: req.method,
-      //headers: req.headers
-      host: undefined
+      headers: req.headers,
     });
 
     const contentType = upstream.headers['content-type'] || '';
-    if (
-      contentType.includes('application/vnd.apple.mpegurl') ||
-      proxyParams.url.includes('.m3u8')
-    ) {
-      const text = await upstream.body.text();
+    if (contentType.includes('application/vnd.apple.mpegurl') || proxyParams.url.includes('.m3u8')) {
+      let body = '';
+      for await (const chunk of upstream.body) {
+        body += chunk;
+      }
+
       const base = proxyParams.url.substring(0, proxyParams.url.lastIndexOf('/'));
-      const rewritten = text.replace(
-        /^(?!#)([^?#\s]+?\.(m3u8|ts|key))([^\s]*)?/gmi,
-        (match) => {
-          const url = match.trim();
-          let fullUrl;
-          if (url.includes('://')) {
-            fullUrl = url;
-          } else if (url.startsWith('/')) {
-            const originUrl = new URL(proxyParams.url);
-            fullUrl = originUrl.origin + url;
-          } else {
-            fullUrl = base + '/' + url;
-          }
-          return `${req.protocol}://${req.get('host')}${req.path}?url=${fullUrl}`;
+      const rewritten = body.replace(/^(?!#)([^?#\s]+?\.(m3u8|ts|key))([^\s]*)?/gmi, (match) => {
+        const url = match.trim();
+        let fullUrl;
+        if (url.includes('://')) {
+          fullUrl = url;
+        } else if (url.startsWith('/')) {
+          const originUrl = new URL(proxyParams.url);
+          fullUrl = originUrl.origin + url;
+        } else {
+          fullUrl = base + '/' + url;
         }
-      );
+        return `${req.protocol}://${req.get('host')}${req.path}?url=${fullUrl}`;
+      });
 
       res.setHeader('Content-Type', 'application/vnd.apple.mpegurl');
       return res.end(rewritten);
