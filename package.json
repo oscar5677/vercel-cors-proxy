@@ -8,9 +8,9 @@
     "start": "vercel dev"
   },
   "dependencies": {
-    "cors": "^2.8.5",
-    "express": "^4.17.1",
-    "undici": "^6.6.0"
+    "cors": "^2.8.5",          
+    "express": "^4.19.2",     
+    "undici": "^6.6.0"        
   },
   "devDependencies": {
     "vercel": "^28.0.0"
