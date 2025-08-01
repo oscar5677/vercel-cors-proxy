@@ -42,7 +42,9 @@ app.all('/*', async (req, res) => {
       body: req.method !== 'GET' && req.method !== 'HEAD' ? req : undefined
     });
 
-    res.writeHead(upstream.statusCode, Object.fromEntries(upstream.headers));
+   // res.writeHead(upstream.statusCode, Object.fromEntries(upstream.headers));
+    res.writeHead(upstream.statusCode, upstream.headers);
+
     upstream.body.pipe(res);
   } catch (err) {
     console.error(err);
