@@ -46,9 +46,43 @@ app.all('/*', async (req, res) => {
     }
     
     // proxy request to target url
-    const target = request(proxyParams.url)
+//              const target = request(proxyParams.url)
    ////////////headers: req.headers, // forward incoming headers
-headers: req.headers, // forward incoming headers
+//               headers: req.headers, // forward incoming headers
+
+
+   const target = request({
+      url: proxyParams.url,
+      headers: req.headers, // forward incoming headers
+      method: req.method
+    });
+    
+    // Rewrite M3U8 content
+    target.on('response', (response) => {
+      const contentType = response.headers['content-type'] || '';
+      if (contentType.includes('application/vnd.apple.mpegurl') || proxyParams.url.includes('.m3u8')) {
+        let body = '';
+        target.on('data', chunk => body += chunk);
+        target.on('end', () => {
+          const base = proxyParams.url.substring(0, proxyParams.url.lastIndexOf('/'));
+          const rewritten = body.replace(/^(?!#)([^?#\s]+?\.(m3u8|ts|key))([^\s]*)?/gmi, (match) => {
+            const url = match.trim();
+            let fullUrl;
+            if (url.includes('://')) {
+              fullUrl = url; // Already absolute
+            } else if (url.startsWith('/')) {
+              const originUrl = new URL(proxyParams.url);
+              fullUrl = originUrl.origin + url; // Domain root
+            } else {
+              fullUrl = base + '/' + url; // Relative to current directory
+            }
+            return `${req.protocol}://${req.get('host')}${req.path}?url=${fullUrl}`;
+          });
+          res.send(rewritten);
+        });
+      }
+    });
+
    
     req.pipe(target)
     target.pipe(res)
