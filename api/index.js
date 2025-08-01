@@ -30,7 +30,8 @@ app.all('/*', async (req, res) => {
 
     const upstream = await undiciRequest(proxyParams.url, {
       method: req.method,
-      headers: req.headers
+      //headers: req.headers
+      host: undefined
     });
 
     const contentType = upstream.headers['content-type'] || '';
