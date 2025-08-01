@@ -32,8 +32,13 @@ app.all('/*', async (req, res) => {
     }
 
     // Remove headers that break upstream HTTPS
-    const headers = { ...req.headers };
-    delete headers['host'];
+    //const headers = { ...req.headers };
+    //delete headers['host'];
+
+    const headers = {
+  ...req.headers,
+  host: new URL(proxyParams.url).host, // ✅ Set correct Akamai host
+};
     delete headers['content-length'];
 
     const upstream = await undiciRequest(proxyParams.url, {
