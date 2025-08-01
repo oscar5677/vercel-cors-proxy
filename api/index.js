@@ -2,16 +2,30 @@ import express from 'express';
 import cors    from 'cors';
 import request from 'request'
 
-function parseProxyParameters(proxyRequest){
-  const params = {}
+//function parseProxyParameters(proxyRequest){
+ // const params = {}
   // url - treat everything right to url= query parameter as target url value
-  const urlMatch = proxyRequest.url.match(/(?<=[?&])url=(?<url>.*)$/)
-  if(urlMatch) {
-    params.url =  decodeURIComponent(urlMatch.groups.url)
-  }
+ // const urlMatch = proxyRequest.url.match(/(?<=[?&])url=(?<url>.*)$/)
+ // if(urlMatch) {
+  //  params.url =  decodeURIComponent(urlMatch.groups.url)
+  //}
   
-  return params
+  //return params
+//}
+
+function parseProxyParameters(proxyRequest) {
+  const params = {};
+  const rawUrl = proxyRequest.url;
+
+  const urlIndex = rawUrl.indexOf('url=');
+  if (urlIndex !== -1) {
+    const extracted = rawUrl.substring(urlIndex + 4); // everything after 'url='
+    params.url = extracted;
+  }
+
+  return params;
 }
+
 
 const app = express();
 app.use(cors());
