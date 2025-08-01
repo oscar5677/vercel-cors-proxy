@@ -31,6 +31,8 @@ function parseProxyParameters(proxyRequest) {
 
 const app = express();
 app.use(cors());
+app.options('/*', cors()); // handle preflight
+
 app.set('json spaces', 2)
 app.all('/*', async (req, res) => {
   try {
@@ -44,6 +46,7 @@ app.all('/*', async (req, res) => {
     
     // proxy request to target url
     const target = request(proxyParams.url)
+   headers: req.headers, // forward incoming headers
     req.pipe(target)
     target.pipe(res)
     
