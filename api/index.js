@@ -4,14 +4,17 @@ import { request as undiciRequest } from 'undici';
 
 function parseProxyParameters(proxyRequest) {
   const params = {};
-  const rawUrl = proxyRequest.url;
+  const rawUrl = proxyRequest.url; // e.g. /?url=https%3A%2F%2Fsony...%3Fauth%3Dabc&other=xyz
   const urlIndex = rawUrl.indexOf('url=');
+
   if (urlIndex !== -1) {
-    const encodedUrl = rawUrl.substring(urlIndex + 4);
-    params.url = decodeURIComponent(encodedUrl);
+    const encodedUrl = rawUrl.substring(urlIndex + 4); // everything after 'url='
+    params.url = decodeURIComponent(encodedUrl); // decode safely
   }
+
   return params;
 }
+
 
 const app = express();
 app.use(cors());
