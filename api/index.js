@@ -20,11 +20,12 @@ function parseProxyParameters(proxyRequest) {
   const urlIndex = rawUrl.indexOf('url=');
   if (urlIndex !== -1) {
     const extracted = rawUrl.substring(urlIndex + 4); // everything after 'url='
-    params.url = extracted;
+    params.url = decodeURIComponent(extracted); // ✅ decode the encoded URL
   }
 
   return params;
 }
+
 
 
 const app = express();
