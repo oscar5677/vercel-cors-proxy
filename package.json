@@ -2,17 +2,11 @@
   "name": "cors-proxy",
   "version": "1.0.0",
   "description": "CORS proxy using undici",
-  "author": "Bengt Brodersen",
+  "author": "Your Name",
   "license": "MIT",
-  "scripts": {
-    "start": "node index.js"
-  },
   "dependencies": {
-    "cors": "^2.8.5",          
-    "express": "^4.19.2",     
-    "undici": "^6.6.2"        
-  },
-  "devDependencies": {
-    "vercel": "^28.0.0"
+    "cors": "^2.8.5",
+    "express": "^4.19.2",
+    "undici": "^7.13.2"
   }
 }
